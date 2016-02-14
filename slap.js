@@ -80,12 +80,12 @@ var modSlap = (function(){
 			return;
 		}
 		
-		if(_slapSettings.accessLevel == "sub" && !sub) {
+		if(_slapSettings.accessLevel == "sub" && !subscriber) {
 			apiLog(`AccessLevel sub and ${from} is not a sub`);
 			return;
 		}
 		
-		if(_slapSettings.accessLevel == "modSub" && (!mod && !sub)) {
+		if(_slapSettings.accessLevel == "modSub" && (!mod && !subscriber)) {
 			apiLog(`AccessLevel modSub and ${from} is not a mod or a sub`);
 			return;
 		}
