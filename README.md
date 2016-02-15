@@ -7,4 +7,8 @@ Repository for all of my Koalabot Modules
   * Has access level configuration
   * Has cooldown configuration
 2. Playing.js
-  * Adds a !playing command (currently does not have a config panel)
+  * Adds a !playing command
+  * Automatically grabs the channel name set in the bot
+3. Lasttweet.js
+  * Adds a !lasttweet command
+  * Set the Twitter user to query in the js file
