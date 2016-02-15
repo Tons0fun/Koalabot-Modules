@@ -11,17 +11,19 @@ var modSlap = (function(){
 	var _myTab = apiAddTab("Slap");
 	var _slapSettings = {
 		accessLevel: "all",
+		timeOut: 10 * 1000,
 		message: `[botname] lurches forth and slaps some sense into [target]!`
 	};
 	
 	var _settingsFileName = "modSlapSettings.ini";
+	var _timedOut = false;
 
-	// To save your settings, this isn't intended to be called from outside
+	//Save _slapSettings
 	var _saveSettings = function () {
 		apiWriteFile( _settingsFileName, JSON.stringify( _slapSettings ) );
 	};
 
-	// load gambling settings, if not create them
+	//load settings, if not create them
 	var _settingsFile = apiOpenFile( _settingsFileName );
 	if (!_settingsFile) { // if it's null or empty
 		_saveSettings();
@@ -63,6 +65,10 @@ var modSlap = (function(){
 						</form>
 					</li>
 					<li class="list-group-item">
+						<strong>Cooldown Duration:</strong>
+						<input id="modSlapTimeoutInput" type="text" size="4" class="text-center"> seconds.
+					</li>
+					<li class="list-group-item">
 						<p><strong>Message:</strong></p>
 						<input id="modSlapMessageInput" type"text" size="80">
 						<div class="panel-body">
@@ -97,21 +103,43 @@ var modSlap = (function(){
 		_saveSettings();
 	});
 	
+	//Sets Time-Out input field to the current setting from modSlapSettings.timeout
+	$("#modSlapTimeoutInput").val(_slapSettings.timeOut / 1000).change();
+	
+	//Updates modSlapSettings.timeout based on the value of the input field
+	$("#modSlapTimeoutInput").change(function() {
+		var temp = $("#modSlapTimeoutInput").val();
+		
+		if(Math.floor(temp) == temp && $.isNumeric(temp) && temp >= 0) {
+			_slapSettings.timeOut = temp * 1000;
+			_saveSettings();
+		} else {
+			$("#modSlapTimeoutInput").val(_slapSettings.timeOut);
+			alert("Please enter a positive integer (e.g.: 1, 2, 3).");
+		}
+	});
+	
+	//Engage the timeout
+	//Taken from JoshTheSquid's Caster module
+	var _timeOut = function(duration) {
+		_timedOut = true;
+		setTimeout( function() {
+			_timedOut = false;
+		}, duration);
+	};
+	
 	//Slap command function
 	var _slapCmd = function (params, from, mod, subscriber) {
-
-		if(_slapSettings.accessLevel == "mod" && !mod) {
-			//apiLog(`AccessLevel mod and ${from} is not a mod`);
-			return;
-		}
 		
-		if(_slapSettings.accessLevel == "sub" && !subscriber) {
-			//apiLog(`AccessLevel sub and ${from} is not a sub`);
+		//Check user level access as determined by _slapSettings.accessLevel
+		if(_slapSettings.accessLevel == "mod" && (!mod && from.toLowerCase() != apiGetChannelName())) {
+			apiLog(`AccessLevel mod and ${from} is not a mod`);
 			return;
-		}
-		
-		if(_slapSettings.accessLevel == "modSub" && (!mod && !subscriber)) {
-			//apiLog(`AccessLevel modSub and ${from} is not a mod or a sub`);
+		} else if(_slapSettings.accessLevel == "sub" && (!subscriber && from.toLowerCase() != apiGetChannelName())) {
+			apiLog(`AccessLevel sub and ${from} is not a sub`);
+			return;
+		} else if(_slapSettings.accessLevel == "modSub" && (!mod && !subscriber && from.toLowerCase() != apiGetChannelName())) {
+			apiLog(`AccessLevel modSub and ${from} is not a mod or a sub`);
 			return;
 		}
 		
@@ -124,15 +152,20 @@ var modSlap = (function(){
 		if ( target.toLowerCase() == from.toLowerCase() ) {
 			return apiSay(`${from} why would you want to slap yourself?`);
 		} else {
+			
+			//Checks if the command is on cooldown
+			if(_timedOut) return;
+			
+			//assign the user set message to a variable in order to replace bracketed variables
+			//[botname], [user], [target]
 			var message = _slapSettings.message;
-			//apiLog(`${message}`);
 			message = message.replace( /\[botname\]/g, apiGetBotName());
-			//apiLog(`${message}`);
 			message = message.replace( /\[user\]/g, from);
-			//apiLog(`${message}`);
 			message = message.replace( /\[target\]/g, target);
-			//apiLog(`${message}`);
-			return apiSay(message);
+			
+			//Displays the slap resonse and activates the cooldown
+			apiSay(message);
+			_timeOut(_slapSettings.timeOut);
 		}
 	};
 	
