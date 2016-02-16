@@ -6,9 +6,13 @@ Repository for all of my Koalabot Modules
   * Adds a !slap command to Koalabot
   * Has access level configuration
   * Has cooldown configuration
+  * Has message returned by bot configuration
 2. Playing.js
   * Adds a !playing command
   * Automatically grabs the channel name set in the bot
 3. Lasttweet.js
   * Adds a !lasttweet command
-  * Set the Twitter user to query in the js file
+  * Has access level configuration
+  * Has cooldown configuration
+  * Has Twitter handle configuration (not case sensitive)
+  * Has message returned by bot configuration
