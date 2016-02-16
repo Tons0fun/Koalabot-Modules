@@ -8,7 +8,7 @@
  *
  */
  
- var modLastTweet = ( function() {
+ var modLastTweet = (function() {
 	
 	//Adding the !lasttweet command
 	apiAddCmd("lasttweet", "modLastTweet.tweetCmd");
@@ -142,36 +142,24 @@
 	//Engage the timeout
 	//Taken from JoshTheSquid's Caster module
 	var _timeOut = function(duration) {
+		apiLog("Inside of _timeOut function");
 		_timedOut = true;
 		setTimeout( function() {
 			_timedOut = false;
 		}, duration);
 	};
 	
-	var _getMessage = function(handle) {
-		$.get(
-			"http://api.newtimenow.com/last-tweet/",
-			{
-				"q" : handle
-			},
-			function(data) {
-				//Set the message output
-				return data;
-			}
-		);
-	};
-	
 	var _lastTweetCmd = function(params, from, mod, subscriber) {
 		
-		//Check user level access as determined by _slapSettings.accessLevel
-		if(_slapSettings.accessLevel == "mod" && (!mod && from.toLowerCase() != apiGetChannelName())) {
-			apiLog(`AccessLevel mod and ${from} is not a mod`);
+		//Check user level access as determined by _lastTweetSettings.accessLevel
+		if(_lastTweetSettings.accessLevel == "mod" && (!mod && from.toLowerCase() != apiGetChannelName())) {
+			//apiLog(`AccessLevel mod and ${from} is not a mod`);
 			return;
-		} else if(_slapSettings.accessLevel == "sub" && (!subscriber && from.toLowerCase() != apiGetChannelName())) {
-			apiLog(`AccessLevel sub and ${from} is not a sub`);
+		} else if(_lastTweetSettings.accessLevel == "sub" && (!subscriber && from.toLowerCase() != apiGetChannelName())) {
+			//apiLog(`AccessLevel sub and ${from} is not a sub`);
 			return;
-		} else if(_slapSettings.accessLevel == "modSub" && (!mod && !subscriber && from.toLowerCase() != apiGetChannelName())) {
-			apiLog(`AccessLevel modSub and ${from} is not a mod or a sub`);
+		} else if(_lastTweetSettings.accessLevel == "modSub" && (!mod && !subscriber && from.toLowerCase() != apiGetChannelName())) {
+			//apiLog(`AccessLevel modSub and ${from} is not a mod or a sub`);
 			return;
 		}
 		
@@ -182,15 +170,28 @@
 		//set the twitter user to call here
 		var twitterUser = _lastTweetSettings.handle;
 		
+		//Checks if the command is on cooldown
+		//If not the bot responds
 		if(_timedOut) {
 			return;
 		} else {
-			
-			var message = _lastTweetSettings.message;
-			message = message.replace( /\[handle\]/g, _lastTweetSettings.handle);
-			message = message.replace( /\[message\]/g, _getMessage(twitterUser));
-			
-			apiSay(message);
+			//grabs the twitterUser's last tweet
+			$.get(
+				"http://api.newtimenow.com/last-tweet/",
+				{
+					"q" : twitterUser
+				},
+				function(data) {
+					//Replace the [handle] and [message] tags with actual data
+					var message = _lastTweetSettings.message;
+					message = message.replace( /\[handle\]/g, twitterUser);
+					message = message.replace( /\[message\]/g, data);
+					
+					//Displays the bot response and activates the cooldown
+					apiSay(message);
+					_timeOut(_lastTweetSettings.timeOut);
+				}
+			)
 		}
 	}
 
