@@ -16,3 +16,9 @@ Repository for all of my Koalabot Modules
   * Has cooldown configuration
   * Has Twitter handle configuration (not case sensitive)
   * Has message returned by bot configuration
+4. Lasttweetinterval.js
+  * Adds a timer that puts the selected Twitter handles last tweet in chat
+  * Has an Enable/Disable toggle
+  * Has Cooldown configuration (in minutes)
+  * Has Twitter handle configuration (not case sensitive)
+  * Has message returned by bot configuration
