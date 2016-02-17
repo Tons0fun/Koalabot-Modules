@@ -142,7 +142,6 @@
 	//Engage the timeout
 	//Taken from JoshTheSquid's Caster module
 	var _timeOut = function(duration) {
-		apiLog("Inside of _timeOut function");
 		_timedOut = true;
 		setTimeout( function() {
 			_timedOut = false;
